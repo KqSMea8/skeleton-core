@@ -3,13 +3,13 @@ import {
     isBase64Img, transparent, checkHasTextDecoration, removeElement, setOpacity,
 } from './util'
 import {
-    DISPLAY_NONE, Node, EXT_REG, TRANSPARENT, GRADIENT_REG,
-    PRE_REMOVE_TAGS, MOCK_TEXT_ID, AFTER_REMOVE_TAGS, CONSOLE_SELECTOR
-} from './config'
-import * as handler from './handlers/index'
+    DISPLAY_NONE, EXT_REG, TRANSPARENT, GRADIENT_REG, TEXT_NODE, ELEMENT_NODE,
+    PRE_REMOVE_TAGS, MOCK_TEXT_ID, AFTER_REMOVE_TAGS
+} from './constant'
+import handler from './handlers/index'
 
 function traverse(options: any) {
-    const { remove, excludes, text, image, button, svg, grayBlock, pseudo, cssUnit, decimal } = options
+    const { excludes, text, image, button, svg, grayBlock, pseudo, cssUnit, decimal } = options
     const excludesEle = excludes.length ? Array.from($$(excludes.join(','))) : []
     const grayEle = grayBlock.length ? Array.from($$(grayBlock.join(','))) : []
     const rootElement = document.documentElement
@@ -24,23 +24,18 @@ function traverse(options: any) {
     const gradientBackEles = []
     const grayBlocks = []
 
-    if (Array.isArray(remove)) {
-        remove.push(CONSOLE_SELECTOR, ...PRE_REMOVE_TAGS)
-        toRemove.push(...$$(remove.join(',')))
-    }
-
     if (button && button.excludes.length) {
         // translate selector to element
         button.excludes = Array.from($$(button.excludes.join(',')))
     }
 
-    ;[svg, pseudo, image].forEach(type => {
+    [svg, pseudo, image].forEach(type => {
         if (type.shapeOpposite.length) {
             type.shapeOpposite = Array.from($$(type.shapeOpposite.join(',')))
         }
     })
 
-        ; (function preTraverse(ele) {
+        ; (function preTraverse(ele: any) {
             const styles = getComputedStyle(ele)
             const hasPseudoEle = checkHasPseudoEle(ele)
             if (!isInViewPort(ele) || DISPLAY_NONE.test(ele.getAttribute('style'))) {
@@ -67,7 +62,7 @@ function traverse(options: any) {
             }
 
             // 将所有拥有 textChildNode 子元素的元素的文字颜色设置成背景色，这样就不会在显示文字了。
-            if (ele.childNodes && Array.from(ele.childNodes).some(n => n.nodeType === Node.TEXT_NODE)) {
+            if (ele.childNodes && Array.from(ele.childNodes).some((n: any) => n.nodeType === TEXT_NODE)) {
                 transparent(ele)
             }
             if (checkHasTextDecoration(styles)) {
@@ -87,7 +82,7 @@ function traverse(options: any) {
                 return imgs.push(ele)
             }
             if (
-                ele.nodeType === Node.ELEMENT_NODE &&
+                ele.nodeType === ELEMENT_NODE &&
                 (ele.tagName === 'BUTTON' || (ele.tagName === 'A' && ele.getAttribute('role') === 'button'))
             ) {
                 return buttons.push(ele)
@@ -95,7 +90,7 @@ function traverse(options: any) {
             if (
                 ele.childNodes &&
                 ele.childNodes.length === 1 &&
-                ele.childNodes[0].nodeType === Node.TEXT_NODE &&
+                ele.childNodes[0].nodeType === TEXT_NODE &&
                 /\S/.test(ele.childNodes[0].textContent)
             ) {
                 return texts.push(ele)
@@ -107,9 +102,9 @@ function traverse(options: any) {
     buttons.forEach(e => handler.button(e, button))
     hasImageBackEles.forEach(e => handler.background(e, image))
     imgs.forEach(e => handler.image(e, image))
-    pseudos.forEach(e => handler.pseudos(e, pseudo))
+    pseudos.forEach(e => handler.paseudos(e, pseudo))
     gradientBackEles.forEach(e => handler.background(e, image))
-    grayBlocks.forEach(e => handler.grayBlock(e, button))
+    grayBlocks.forEach(e => handler.grayblock(e, button))
     // remove mock text wrapper
     const offScreenParagraph = $(`#${MOCK_TEXT_ID}`)
     if (offScreenParagraph && offScreenParagraph.parentNode) {
@@ -118,11 +113,10 @@ function traverse(options: any) {
     toRemove.forEach(e => removeElement(e))
 }
 
-function genSkeleton(options) {
+function genSkeleton(options: any) {
     const {
         remove,
         hide,
-        loading = 'spin'
     } = options
     /**
      * before walk
@@ -158,7 +152,7 @@ function genSkeleton(options) {
 function getHtmlAndStyle() {
     const root = document.documentElement
     const rawHtml = root.outerHTML
-    const styles = Array.from($$('style')).map(style => style.innerHTML || style.innerText)
+    const styles = Array.from($$('style')).map((style: any) => style.innerHTML || style.innerText)
     Array.from($$(AFTER_REMOVE_TAGS.join(','))).forEach(ele => removeElement(ele))
     // fix html parser can not handle `<div ubt-click=3659 ubt-data="{&quot;restaurant_id&quot;:1236835}" >`
     // need replace `&quot;` into `'`

@@ -2,7 +2,7 @@
   "name": "skeleton-core",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "jest",
     "build": "tsc"
@@ -22,9 +22,12 @@
   },
   "homepage": "https://github.com/NealST/skeleton-core#readme",
   "dependencies": {
+    "himalaya": "^1.1.0",
     "typescript": "^3.4.4"
   },
   "devDependencies": {
+    "@babel/parser": "^7.4.4",
+    "@babel/types": "^7.4.4",
     "jest": "^24.7.1",
     "jsdom": "^15.0.0"
   }
